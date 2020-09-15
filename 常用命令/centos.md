@@ -329,3 +329,74 @@ $HOME/my这个文件夹是存放my.cnf配置文件
 nohup java -jar k12_classroom-0.0.1-SNAPSHOT.jar --server.port=9001 &
 ```
 
+
+
+
+
+# 7、IDEA配置Docker插件
+
+## 1、修改docker.service,开启2375端口
+
+```
+vim /usr/lib/systemd/system/docker.service
+```
+
+
+
+## 2、在ExecStart末尾增加 ：按"i"插入，按"Esc"退出，输入":wq" 完成文件写入
+
+```
+# 允许所有客户端连接
+-H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock
+```
+
+![image-20200915142014343](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200915142014343.png)
+
+
+
+## 3、重新加载配置文件和重启Docker
+
+```
+systemctl daemon-reload 
+systemctl restart docker 
+```
+
+
+
+## 4、查看进程
+
+```
+netstat -tulp
+```
+
+![image-20200915141919627](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200915141919627.png)
+
+```
+netstat -nplt |grep 2375
+```
+
+![image-20200915141929116](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200915141929116.png)
+
+
+
+## 5、防火墙开放2375端口/重启防火墙
+
+```
+firewall-cmd --zone=public --add-port=2375/tcp --permanent
+firewall-cmd --reload
+```
+
+<!--*注意：虚拟机或与服务器的安全组也要开放2375端口，否者依然无法访问！*-->
+
+
+
+## 6、IDEA安装docker插件
+
+![image-20200915142625759](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200915142625759.png)
+
+
+
+## 7、配置连接ip和port
+
+![image-20200915142824418](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200915142824418.png)
+
