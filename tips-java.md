@@ -334,3 +334,115 @@ public class Singleton{
 }
 ```
 
+## 3、配置Druid
+
+### （1）yml文件
+
+```
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://139.196.141.79:4000/class_manager?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC&autoReconnect=true&failOverReadOnly=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 5000
+      # 状态监控
+      filter:
+        stat:
+        enabled: true
+        db-type: mysql
+        log-slow-sql: true
+        slow-sql-millis: 2000
+      # 监控过滤器
+      filters: stat,wall,logback
+      web-stat-filter:
+        enabled: true
+        exclusions:
+          - "*.js"
+          - "*.gif"
+          - "*.jpg"
+          - "*.png"
+          - "*.css"
+          - "*.ico"
+          - "/druid/*"
+      # druid 监控页面
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: 123456
+
+```
+
+### （2）配置类
+
+```
+@Configuration
+public class DruidConfig {
+    /**
+     * 配置监控服务器
+     *
+     * @return 返回监控注册的servlet对象
+     */
+    @ConfigurationProperties(prefix = "spring.datasource")
+    @Bean
+    public ServletRegistrationBean statViewServlet() {
+        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new StatViewServlet(), "/druid/*");
+        // 添加IP白名单
+        servletRegistrationBean.addInitParameter("allow", "");
+        // 添加IP黑名单，当白名单和黑名单重复时，黑名单优先级更高
+        servletRegistrationBean.addInitParameter("deny", "");
+        // 添加控制台管理用户
+        servletRegistrationBean.addInitParameter("loginUsername", "admin");
+        servletRegistrationBean.addInitParameter("loginPassword", "123456");
+        // 是否能够重置数据
+        servletRegistrationBean.addInitParameter("resetEnable", "false");
+        return servletRegistrationBean;
+    }
+
+    /**
+     * 配置服务过滤器
+     *
+     * @return 返回过滤器配置对象
+     */
+    @Bean
+    public FilterRegistrationBean webStatFilter() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new WebStatFilter());
+        // 添加过滤规则
+        filterRegistrationBean.addUrlPatterns("/*");
+        // 忽略过滤格式
+        filterRegistrationBean.addInitParameter("exclusions", "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*,");
+        return filterRegistrationBean;
+    }
+}
+
+```
+
+### （3）注意问题
+
+项目里用的哪个日志框架，filters就填写哪个框架：![image-20200924115436704](/Users/weihuajian/Library/Application Support/typora-user-images/image-20200924115436704.png)
+
+
+
+
+
+springboot2.3.3
+
+maven3.6.3
+
+tk-mybatis
+
+swagger
+
+druid
+
+jenkis+docker 
+
+
+
+热部署
+
